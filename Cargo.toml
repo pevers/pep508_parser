@@ -1,0 +1,20 @@
+[package]
+name = "pep508_parser"
+version = "0.1.0"
+edition = "2021"
+authors = ["Peter Evers"]
+description = "PEP-508 parser"
+license = "MIT"
+keywords = ["pep508", "python", "parser"]
+readme = "README.md"
+homepage = "https://github.com/pevers/pep508_parser"
+repository = "https://github.com/pevers/pep508_parser"
+
+[dependencies]
+semver = "1.0.14"
+pest = "2.4.1"
+pest_derive = "2.4.1"
+thiserror = "1.0.37"
+
+[dev-dependencies]
+rstest = "0.15.0"

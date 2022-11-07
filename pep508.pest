@@ -1,0 +1,41 @@
+WHITESPACE      = _{ " " | "\t" }
+version_cmp     = { ( "<=" | "<" | "!=" | "===" | "==" | ">=" | ">" | "~=")+ }
+version         = { ( (ASCII_ALPHA | ASCII_DIGIT) | "-" | "_" | "." | "*" | "+" | "!" )+ }
+version_one     = { version_cmp ~ version }
+version_many    = { version_one ~ ("," ~ version_one)* }
+versionspec     = { "(" ~ version_many ~ ")" | version_many }
+urlspec         = { "@" ~ URI_reference }
+marker_op       = { version_cmp | "in" | ("not" ~ "in") }
+python_str_c    = { ASCII_ALPHA | ASCII_DIGIT | "(" | ")" | "." | "{" | "}" |
+                 "-" | "_" | "*" | "#" | ":" | ";" | "," | "/" | "?" |
+                 "[" | "]" | "!" | "~" | "`" | "@" | "$" | "%" | "^" |
+                 "&" | "=" | "+" | "|" | "<" | ">" }
+dquote          = { "\"" }
+squote          = { "'" }
+python_str      = { (squote ~ (python_str_c | dquote)* ~ squote |
+                 dquote ~ (python_str_c | squote)* ~ dquote) }
+env_var         = { ("python_version" | "python_full_version" |
+                 "os_name" | "sys_platform" | "platform_release" |
+                 "platform_system" | "platform_version" |
+                 "platform_machine" | "platform_python_implementation" |
+                 "implementation_name" | "implementation_version" |
+                 "extra"
+                 ) }
+marker_var      = { (env_var | python_str) }
+marker_expr     = { marker_var ~ marker_op ~ marker_var
+                    | "(" ~ marker ~ ")" }
+marker_and      = { marker_expr ~ "and" ~ marker_expr
+                    | marker_expr }
+marker_or       = { marker_and ~ "or" ~ marker_and
+                    | marker_and }
+marker          = { marker_or }
+quoted_marker   = { ";" ~ marker }
+identifier_end  = { (ASCII_ALPHA | ASCII_DIGIT) | (("-" | "_" | "." )* ~ (ASCII_ALPHA | ASCII_DIGIT)) }
+identifier      = { (ASCII_ALPHA | ASCII_DIGIT) ~ identifier_end* }
+name            = { identifier }
+extras_list     = { identifier ~ ("," ~ identifier)* }
+extras          = {"[" ~ extras_list? ~ "]" }
+name_req        = { name ~ extras? ~ versionspec? ~ quoted_marker? ~ EOI }
+url_req         = { name ~ extras? ~ urlspec ~ quoted_marker? ~ EOI }
+URI_reference = { (!(" " | "\t" | ";") ~ ANY)* }      // TODO: This rule is not strict enough and should probably 
+main            = { SOI ~ (name_req | url_req) }
